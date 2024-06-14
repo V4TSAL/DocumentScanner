@@ -74,5 +74,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
     //livedata
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.8")
+    //pdf viewer
+    implementation ("io.github.grizzi91:bouquet:1.1.2")
+
 
 }
