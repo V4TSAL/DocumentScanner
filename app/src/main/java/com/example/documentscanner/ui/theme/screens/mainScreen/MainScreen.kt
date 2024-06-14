@@ -1,6 +1,8 @@
 package com.example.documentscanner.ui.theme.screens.mainScreen
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -37,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
+import com.example.documentscanner.R
+import com.example.documentscanner.ui.theme.screens.pdfViewer.PdfViewActivity
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
@@ -72,7 +77,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     pdfUri!!.toFile()
                     val pageCount = pdf.pageCount
                 }
-                viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), imageUri = imageUri!!))
+                viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), pdfUri = pdfUri!!,imageUri = imageUri!!))
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
             }
         })
@@ -86,7 +91,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
         .build()
     val scanner = GmsDocumentScanning.getClient(options)
     val context = LocalContext.current
-    val files = viewModel.documentInformation.observeAsState().value
+    val files = viewModel.documentInformation.observeAsState(arrayListOf())
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .statusBarsPadding(), topBar = { TopAppBar(title = { Greeting {} }) }) { scaffoldPadding ->
@@ -98,15 +103,20 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                if(!files.isNullOrEmpty()){
+                if(files.value.isNotEmpty()){
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
-                        items(files.toList()){ fileInfo->
-                            GridViewItems(item = fileInfo) {
-
+                        items(files.value){ fileInfo->
+                            GridViewItems(item = fileInfo) {fileInformation->
+                                val intent = Intent(context,PdfViewActivity::class.java)
+                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
+                                context.startActivity(intent)
                             }
                         }
                     }
                 }
+            }
+            if(files.value.isEmpty()){
+                Text(text = "No files found tap on the plus icon to start", modifier = Modifier.align(Alignment.Center))
             }
             FloatingActionButton(onClick = {
                 scanner.getStartScanIntent(activity)
@@ -127,7 +137,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
 }
 
 @Composable
-fun GridViewItems(item : FileModel,itemOnTap: ()-> Unit) {
+fun GridViewItems(item : FileModel,itemOnTap: (fileModel: FileModel)-> Unit) {
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
@@ -141,7 +151,7 @@ fun GridViewItems(item : FileModel,itemOnTap: ()-> Unit) {
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable {
-                itemOnTap()
+                itemOnTap(item)
             }
     ) {
         Column(
