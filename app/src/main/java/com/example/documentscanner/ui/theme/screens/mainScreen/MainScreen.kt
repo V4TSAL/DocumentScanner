@@ -52,6 +52,7 @@ import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
 import com.example.documentscanner.ui.theme.screens.pdfViewer.PdfViewActivity
+import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
@@ -107,9 +108,17 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
-                                val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
-                                context.startActivity(intent)
+//                                val intent = Intent(context,PdfViewActivity::class.java)
+//                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
+//                                context.startActivity(intent)
+//                                val shareIntent = Intent().apply {
+//                                    action = Intent.ACTION_SEND
+//                                    type = "application/pdf"
+//                                    putExtra(Intent.EXTRA_STREAM, fileInformation.pdfUri.toFile())
+//                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//                                }
+//                                context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
+                                viewModel.sharePdf(context = context,file = fileInfo.file)
                             }
                         }
                     }
@@ -161,8 +170,10 @@ fun GridViewItems(item : FileModel,itemOnTap: (fileModel: FileModel)-> Unit) {
                 .padding(12.dp)
         ) {
             AsyncImage(
-                model  = item.imageUri,contentDescription = "Image")
-//            Text(text = item.name, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+                model  = item.imageUri,contentDescription = "Image",Modifier
+                    .padding(12.dp)
+                    .height(120.dp))
+            Text(text = item.file.name, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
 }
