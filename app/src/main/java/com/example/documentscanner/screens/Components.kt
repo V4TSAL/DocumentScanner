@@ -1,4 +1,4 @@
-package com.example.documentscanner.ui.theme.screens
+package com.example.documentscanner.screens
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

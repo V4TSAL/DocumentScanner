@@ -1,4 +1,4 @@
-package com.example.documentscanner.ui.theme.screens.pdfViewer
+package com.example.documentscanner.screens.pdfViewer
 
 import PdfViewer
 import android.net.Uri

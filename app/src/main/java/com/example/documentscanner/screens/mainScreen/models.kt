@@ -1,4 +1,4 @@
-package com.example.documentscanner.ui.theme.screens.mainScreen
+package com.example.documentscanner.screens.mainScreen
 
 import android.net.Uri
 import java.io.File

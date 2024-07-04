@@ -1,4 +1,4 @@
-package com.example.documentscanner.ui.theme.screens.mainScreen
+package com.example.documentscanner.screens.mainScreen
 
 import android.content.Context
 import android.content.Intent

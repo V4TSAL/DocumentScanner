@@ -1,4 +1,4 @@
-package com.example.documentscanner.ui.theme.screens.mainScreen
+package com.example.documentscanner.screens.mainScreen
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -51,7 +51,7 @@ import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
-import com.example.documentscanner.ui.theme.screens.pdfViewer.PdfViewActivity
+import com.example.documentscanner.screens.pdfViewer.PdfViewActivity
 import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
@@ -146,7 +146,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
 }
 
 @Composable
-fun GridViewItems(item : FileModel,itemOnTap: (fileModel: FileModel)-> Unit) {
+fun GridViewItems(item : FileModel, itemOnTap: (fileModel: FileModel)-> Unit) {
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
