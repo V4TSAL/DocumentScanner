@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.documentscanner.localStorage.AppPreferences
+import com.example.documentscanner.screens.LoginOrSignup
 import com.example.documentscanner.screens.LoginScreen
 import com.example.documentscanner.ui.theme.DocumentScannerTheme
 import com.example.documentscanner.screens.StyledText
@@ -50,10 +51,12 @@ class SplashActivity : AppCompatActivity() {
                                 splashViewModel.showLoginScreen.value = true
                             }
                         }
-                    }else{
-                        LoginScreen{userName,password->
-                            splashViewModel.login(userName,password)
-                        }
+                    } else {
+                        LoginOrSignup(login = { username, password ->
+                            splashViewModel.login(username = username, password = password)
+                        }, register = { username, password ->
+                            splashViewModel.signup(username = username, password = password)
+                        })
                     }
 
                 }

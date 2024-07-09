@@ -56,7 +56,6 @@ import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
@@ -80,6 +79,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                 }
                 viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), pdfUri = pdfUri!!,imageUri = imageUri!!))
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
+                viewModel.uploadImage(pdfUri!!.toFile())
             }
         })
     val options = GmsDocumentScannerOptions.Builder()
@@ -104,13 +104,17 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
+                AsyncImage(
+                    model  = "http://192.168.1.28:8080/api/getFile/file-535744591394890.pdf",contentDescription = "Image",Modifier
+                        .padding(12.dp)
+                        .height(120.dp))
                 if(files.value.isNotEmpty()){
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
-//                                val intent = Intent(context,PdfViewActivity::class.java)
-//                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
-//                                context.startActivity(intent)
+                                val intent = Intent(context,PdfViewActivity::class.java)
+                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
+                                context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
 //                                    type = "application/pdf"
@@ -118,7 +122,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
 //                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 //                                }
 //                                context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
-                                viewModel.sharePdf(context = context,file = fileInfo.file)
+//                                viewModel.sharePdf(context = context,file = fileInfo.file)
                             }
                         }
                     }
@@ -131,6 +135,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                 scanner.getStartScanIntent(activity)
                     .addOnSuccessListener {scannerIntent->
                         scannerLauncher.launch(IntentSenderRequest.Builder( scannerIntent).build())
+
                     }
                     .addOnFailureListener {
                         Toast.makeText(context,"Something went wrong", Toast.LENGTH_SHORT).show()

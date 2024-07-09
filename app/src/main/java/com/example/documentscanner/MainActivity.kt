@@ -1,6 +1,9 @@
 package com.example.documentscanner
 
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -16,7 +19,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.documentscanner.ui.theme.DocumentScannerTheme
 import com.example.documentscanner.screens.mainScreen.MainScreen
 import com.example.documentscanner.screens.mainScreen.MainScreenViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel : MainScreenViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,22 +39,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-enum class LoginFlowScreen{
-    LoginScreen,
-    MainScreen
-}
-@Composable
-fun LoginFlow(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = LoginFlowScreen.LoginScreen.name, modifier = modifier) {
-        composable(route = LoginFlowScreen.LoginScreen.name){
 
-        }
-        composable(route = LoginFlowScreen.MainScreen.name){
-//            MainScreen()
-        }
-    }
-}
 
 
 

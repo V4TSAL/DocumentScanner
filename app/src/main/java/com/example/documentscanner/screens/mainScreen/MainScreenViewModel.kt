@@ -6,12 +6,24 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.documentscanner.network.ApiRepository
+import com.example.documentscanner.network.ApiStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import javax.inject.Inject
 
-class MainScreenViewModel : ViewModel(){
+@HiltViewModel
+class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository) : ViewModel(){
     private val _documentInformation  = MutableLiveData<ArrayList<FileModel>>(arrayListOf())
     val documentInformation : LiveData<ArrayList<FileModel>> = _documentInformation
     fun addFile(fileInfo : FileModel){
@@ -48,5 +60,38 @@ class MainScreenViewModel : ViewModel(){
         }
 
         context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
+    }
+    fun uploadImage(file:File){
+        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+        val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+        val category = "file".toRequestBody("text/plain".toMediaTypeOrNull())
+        viewModelScope.launch {
+//            _loading.value = true
+            val result = apiRepo.upload(filePart, category)
+            when (result) {
+                is ApiStatus.Success -> {
+
+                }
+
+                is ApiStatus.Error -> {
+                }
+            }
+//            _loading.value = false
+        }
+
+    }
+    fun getFile(success:(fileInfo:File)->Unit){
+        viewModelScope.launch {
+            val result = apiRepo.getFile()
+            when(result){
+                is ApiStatus.Success -> {
+                    val tempData = FileModel(file = result.data, pdfUri = result.data.toUri(), imageUri = null )
+                    success(result.data)
+                }
+                is ApiStatus.Error -> {
+                    Log.d("ERROR BLOCK CHECK", "getFile: ${result.apiError}")
+                }
+            }
+        }
     }
 }

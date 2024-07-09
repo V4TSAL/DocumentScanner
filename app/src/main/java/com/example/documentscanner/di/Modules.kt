@@ -1,6 +1,7 @@
 package com.example.documentscanner.di
 
 import com.example.documentscanner.network.ApiInterface
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +28,7 @@ object Modules {
             .build()
         return Retrofit.Builder()
             .baseUrl("http://192.168.1.28:8080")
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
             .client(okHttpClient)
             .build()
     }
