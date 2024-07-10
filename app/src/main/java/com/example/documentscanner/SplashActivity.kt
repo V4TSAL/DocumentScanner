@@ -18,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.documentscanner.globals.userId
 import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.screens.LoginOrSignup
 import com.example.documentscanner.screens.LoginScreen
@@ -45,6 +46,7 @@ class SplashActivity : AppCompatActivity() {
                     if(!showLoginScreen.value){
                         Greeting {
                             if(appPreferences.getToken().isNotEmpty()){
+                                userId = appPreferences.getToken().toInt()
                                 goToHomeScreen()
                             }
                             else{
@@ -53,7 +55,9 @@ class SplashActivity : AppCompatActivity() {
                         }
                     } else {
                         LoginOrSignup(login = { username, password ->
-                            splashViewModel.login(username = username, password = password)
+                            splashViewModel.login(username = username, password = password){
+                                goToHomeScreen()
+                            }
                         }, register = { username, password ->
                             splashViewModel.signup(username = username, password = password)
                         })

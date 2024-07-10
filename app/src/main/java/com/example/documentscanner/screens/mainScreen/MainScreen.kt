@@ -51,6 +51,7 @@ import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
+import com.example.documentscanner.network.FileInformation
 import com.example.documentscanner.screens.pdfViewer.PdfViewActivity
 import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
@@ -59,6 +60,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
+    viewModel.getUserFile()
     val scannerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
@@ -77,9 +79,14 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     pdfUri!!.toFile()
                     val pageCount = pdf.pageCount
                 }
-                viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), pdfUri = pdfUri!!,imageUri = imageUri!!))
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
-                viewModel.uploadImage(pdfUri!!.toFile())
+                viewModel.uploadImage(pdfUri!!.toFile()){pdfId->
+                    viewModel.pdfFileId = pdfId
+                    viewModel.uploadImage(imageUri!!.toFile()){imageId->
+                        viewModel.pdfImageId = imageId
+                        viewModel.storeFile(fileName = viewModel.pdfFileId, pdfImageId = viewModel.pdfImageId)
+                    }
+                }
             }
         })
     val options = GmsDocumentScannerOptions.Builder()
@@ -104,16 +111,12 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                AsyncImage(
-                    model  = "http://192.168.1.28:8080/api/getFile/file-535744591394890.pdf",contentDescription = "Image",Modifier
-                        .padding(12.dp)
-                        .height(120.dp))
                 if(files.value.isNotEmpty()){
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
                                 val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
+                                intent.putExtra("pdfUri",fileInformation.fileUrl)
                                 context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
@@ -151,7 +154,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
 }
 
 @Composable
-fun GridViewItems(item : FileModel, itemOnTap: (fileModel: FileModel)-> Unit) {
+fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation)-> Unit) {
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
@@ -175,10 +178,10 @@ fun GridViewItems(item : FileModel, itemOnTap: (fileModel: FileModel)-> Unit) {
                 .padding(12.dp)
         ) {
             AsyncImage(
-                model  = item.imageUri,contentDescription = "Image",Modifier
+                model  = item.fileImageUrl,contentDescription = "Image",Modifier
                     .padding(12.dp)
                     .height(120.dp))
-            Text(text = item.file.name, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Text(text = item.fileName!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
 }

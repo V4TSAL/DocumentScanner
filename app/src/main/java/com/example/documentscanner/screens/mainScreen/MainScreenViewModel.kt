@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.documentscanner.network.ApiRepository
 import com.example.documentscanner.network.ApiStatus
+import com.example.documentscanner.network.FileInformation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -24,10 +25,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository) : ViewModel(){
-    private val _documentInformation  = MutableLiveData<ArrayList<FileModel>>(arrayListOf())
-    val documentInformation : LiveData<ArrayList<FileModel>> = _documentInformation
-    fun addFile(fileInfo : FileModel){
-        val tempArray = arrayListOf<FileModel>()
+    private val _documentInformation  = MutableLiveData<List<FileInformation>>()
+    val documentInformation : LiveData<List<FileInformation>> = _documentInformation
+    var pdfFileId = ""
+    var pdfImageId = ""
+    fun addFile(fileInfo : FileInformation){
+        val tempArray = arrayListOf<FileInformation>()
         if(documentInformation.value!!.isNotEmpty()){
             documentInformation.value!!.forEach {
                 tempArray.add(it)
@@ -61,7 +64,7 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
 
         context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
     }
-    fun uploadImage(file:File){
+    fun uploadImage(file:File, onSuccess : (fileName : String)->Unit){
         val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
         val category = "file".toRequestBody("text/plain".toMediaTypeOrNull())
@@ -70,7 +73,7 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
             val result = apiRepo.upload(filePart, category)
             when (result) {
                 is ApiStatus.Success -> {
-
+                    onSuccess(result.data.message)
                 }
 
                 is ApiStatus.Error -> {
@@ -80,13 +83,18 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
         }
 
     }
-    fun getFile(success:(fileInfo:File)->Unit){
+    fun storeFile(fileName : String,pdfImageId : String){
+        viewModelScope.launch {
+            val result = apiRepo.storeFile(fileName,pdfImageId)
+        }
+    }
+    fun getUserFile(){
         viewModelScope.launch {
             val result = apiRepo.getFile()
             when(result){
                 is ApiStatus.Success -> {
-                    val tempData = FileModel(file = result.data, pdfUri = result.data.toUri(), imageUri = null )
-                    success(result.data)
+//                    val tempData = FileModel(file = , pdfUri = result.data.toUri(), imageUri = null )
+                    _documentInformation.value = result.data.userFiles
                 }
                 is ApiStatus.Error -> {
                     Log.d("ERROR BLOCK CHECK", "getFile: ${result.apiError}")
