@@ -79,7 +79,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                 }
                 viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), pdfUri = pdfUri!!,imageUri = imageUri!!))
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
-                viewModel.uploadImage(pdfUri!!.toFile())
+//                viewModel.uploadImage(pdfUri!!.toFile())
             }
         })
     val options = GmsDocumentScannerOptions.Builder()
@@ -104,10 +104,6 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                AsyncImage(
-                    model  = "http://192.168.1.28:8080/api/getFile/file-535744591394890.pdf",contentDescription = "Image",Modifier
-                        .padding(12.dp)
-                        .height(120.dp))
                 if(files.value.isNotEmpty()){
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
                         items(files.value){ fileInfo->
