@@ -51,6 +51,7 @@ import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
+import com.example.documentscanner.globals.baseUrl
 import com.example.documentscanner.network.FileInformation
 import com.example.documentscanner.screens.pdfViewer.PdfViewActivity
 import com.google.firebase.components.BuildConfig
@@ -116,7 +117,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
                                 val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.fileUrl)
+                                intent.putExtra("pdfUri",fileInformation.pdfId)
                                 context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
@@ -178,10 +179,10 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
                 .padding(12.dp)
         ) {
             AsyncImage(
-                model  = item.fileImageUrl,contentDescription = "Image",Modifier
+                model  = "$baseUrl/api/getFile/${item.pdfImageId}",contentDescription = "Image",Modifier
                     .padding(12.dp)
                     .height(120.dp))
-            Text(text = item.fileName!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Text(text = item.pdfId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
 }

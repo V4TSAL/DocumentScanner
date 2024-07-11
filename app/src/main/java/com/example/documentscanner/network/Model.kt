@@ -19,7 +19,7 @@ data class AllFiles(
     var userFiles : List<FileInformation>
 )
 data class FileInformation(
-    var fileName : String? = null,
-    var fileUrl  : String? = null ,
-    var fileImageUrl : String? = null,
+    var pdfId : String? = null,
+    var pdfImageId  : String? = null ,
+//    var fileImageUrl : String? = null,
 )

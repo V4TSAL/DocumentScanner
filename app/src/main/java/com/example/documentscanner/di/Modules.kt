@@ -1,5 +1,6 @@
 package com.example.documentscanner.di
 
+import com.example.documentscanner.globals.baseUrl
 import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.network.ApiInterface
 import com.example.documentscanner.network.AuthTokenInterceptor
@@ -31,7 +32,7 @@ object Modules {
             .readTimeout(2, TimeUnit.MINUTES)
             .build()
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.28:8080")
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
             .client(okHttpClient)
             .build()

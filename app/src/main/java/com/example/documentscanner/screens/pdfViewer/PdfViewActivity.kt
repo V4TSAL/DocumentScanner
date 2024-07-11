@@ -9,7 +9,7 @@ import androidx.core.net.toUri
 
 class PdfViewActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
-        val uri : Uri = intent.getStringExtra("pdfUri")!!.toUri()
+        val uri : String = intent.getStringExtra("pdfUri")!!
         super.onCreate(savedInstanceState)
         setContent {
             PdfViewer(uri = uri )

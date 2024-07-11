@@ -33,6 +33,7 @@ import coil.compose.rememberImagePainter
 import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
+import com.example.documentscanner.globals.baseUrl
 import com.rizzi.bouquet.ResourceType
 import com.rizzi.bouquet.VerticalPDFReader
 import com.rizzi.bouquet.VerticalPdfReaderState
@@ -132,8 +133,9 @@ import kotlin.math.sqrt
 //    }
 //}
 @Composable
-fun PdfViewer(modifier: Modifier = Modifier,uri: Uri) {
-    val pdfVerticalReaderState = VerticalPdfReaderState(ResourceType.Local(uri), isZoomEnable = true)
+fun PdfViewer(modifier: Modifier = Modifier,uri: String) {
+    val pdfUrl = "$baseUrl/api/getFile/${uri}"
+    val pdfVerticalReaderState = VerticalPdfReaderState(ResourceType.Remote(pdfUrl), isZoomEnable = true)
     VerticalPDFReader(
         state = pdfVerticalReaderState, modifier = Modifier
             .fillMaxSize()
