@@ -15,7 +15,7 @@ interface ApiInterface {
     @POST("/api/login")
     suspend fun login(@Body user: User) : LoginResponse
     @POST("/api/register")
-    suspend fun register(@Body user: User)
+    suspend fun register(@Body user: User) : LoginResponse
     @Multipart
     @POST("/api/upload")
     suspend fun addImage(@Part image: MultipartBody.Part, @Part("assetCategory") imageCategory: RequestBody) : Message

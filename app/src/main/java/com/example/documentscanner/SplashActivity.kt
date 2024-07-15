@@ -63,7 +63,9 @@ class SplashActivity : AppCompatActivity() {
                                     goToHomeScreen()
                                 }
                             }, register = { username, password ->
-                                splashViewModel.signup(username = username, password = password)
+                                splashViewModel.signup(username = username, password = password){
+                                    goToHomeScreen()
+                                }
                             })
                             if(showLoader.value){
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

@@ -15,7 +15,7 @@ class ApiRepository @Inject constructor(private val apiInterface:ApiInterface) {
             apiInterface.login(user)
         }
     }
-    suspend fun singUp(user: User): ApiStatus<Unit>{
+    suspend fun singUp(user: User): ApiStatus<LoginResponse>{
         return apiCallHandler {
             apiInterface.register(user)
         }

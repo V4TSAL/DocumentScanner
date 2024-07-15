@@ -38,10 +38,20 @@ class SplashViewModel @Inject constructor(private val apiRepo:ApiRepository,priv
             showLoader.value = false
         }
     }
-    fun signup(username: String, password: String){
+    fun signup(username: String, password: String,onSuccess:()->Unit){
         viewModelScope.launch{
-            apiRepo.singUp(User(userName = username,password = password))
-            appPref.setToken("LOGGEDIN")
+            showLoader.value = true
+            val result = apiRepo.singUp(User(userName = username,password = password))
+            when(result){
+                is ApiStatus.Success -> {
+                    appPref.setToken(result.data.message.toString())
+                    onSuccess()
+                }
+                is ApiStatus.Error -> {
+                    println("Error")
+                }
+            }
+            showLoader.value = false
         }
     }
 
