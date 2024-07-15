@@ -23,5 +23,5 @@ interface ApiInterface {
     suspend fun storeFile(@Body fileName:FileIds): AllFiles
 
     @GET("/api/getFileForUser/{userId}")
-    suspend fun getFile(@Path("userId") userId:Int):AllFiles
+    suspend fun getFile(@Path("userId") userId:String):AllFiles
 }

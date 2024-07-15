@@ -50,7 +50,7 @@ class SplashActivity : AppCompatActivity() {
                     if (!showLoginScreen.value) {
                         Greeting {
                             if (appPreferences.getToken().isNotEmpty()) {
-                                userId = appPreferences.getToken().toInt()
+                                userId = appPreferences.getToken()
                                 goToHomeScreen()
                             } else {
                                 splashViewModel.showLoginScreen.value = true

@@ -15,7 +15,7 @@ data class FileIds(
     var pdfImageId : String
 )
 data class LoginResponse(
-    var message : Int,
+    var message : String,
 )
 data class AllFiles(
     var userFiles : List<FileInformation>
