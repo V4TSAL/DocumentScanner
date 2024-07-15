@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -62,6 +63,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 @Composable
 fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
     viewModel.getUserFile()
+    val showLoader = viewModel.showLoader.observeAsState(false)
     val scannerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
@@ -117,7 +119,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
                                 val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.pdfId)
+                                intent.putExtra("pdfUri",fileInformation.fileId)
                                 context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
@@ -131,6 +133,9 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                         }
                     }
                 }
+            }
+            if(showLoader.value){
+                CircularProgressIndicator(modifier= Modifier.align(Alignment.Center))
             }
             if(files.value.isEmpty()){
                 Text(text = "No files found tap on the plus icon to start", modifier = Modifier.align(Alignment.Center))
@@ -179,10 +184,11 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
                 .padding(12.dp)
         ) {
             AsyncImage(
-                model  = "$baseUrl/api/getFile/${item.pdfImageId}",contentDescription = "Image",Modifier
+                model  = "$baseUrl/api/getFile/${item.fileImageId}",contentDescription = "Image",
+                Modifier
                     .padding(12.dp)
                     .height(120.dp))
-            Text(text = item.pdfId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
 }

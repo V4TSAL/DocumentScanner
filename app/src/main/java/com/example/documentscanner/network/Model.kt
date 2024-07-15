@@ -1,5 +1,7 @@
 package com.example.documentscanner.network
 
+import com.google.gson.annotations.SerializedName
+
 data class User(
     var userName : String,
     var password : String,
@@ -19,7 +21,6 @@ data class AllFiles(
     var userFiles : List<FileInformation>
 )
 data class FileInformation(
-    var pdfId : String? = null,
-    var pdfImageId  : String? = null ,
-//    var fileImageUrl : String? = null,
+    @SerializedName("file_id") var fileId : String? = null,
+    @SerializedName("file_image_id") var fileImageId : String? = null,
 )

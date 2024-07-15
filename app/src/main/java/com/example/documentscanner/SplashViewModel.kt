@@ -20,8 +20,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(private val apiRepo:ApiRepository,private val appPref:AppPreferences) : ViewModel() {
     val showLoginScreen  = MutableLiveData(false)
+    val showLoader  = MutableLiveData(false)
     fun login(username: String, password: String,onSuccess:()->Unit){
         viewModelScope.launch{
+            showLoader.value = true
             var result = apiRepo.login(User(userName = username,password = password))
             when(result){
                 is ApiStatus.Success -> {
@@ -33,6 +35,7 @@ class SplashViewModel @Inject constructor(private val apiRepo:ApiRepository,priv
                     println("Error")
                 }
             }
+            showLoader.value = false
         }
     }
     fun signup(username: String, password: String){

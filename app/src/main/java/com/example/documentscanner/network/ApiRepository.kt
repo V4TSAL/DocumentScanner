@@ -29,7 +29,7 @@ class ApiRepository @Inject constructor(private val apiInterface:ApiInterface) {
             apiInterface.addImage(image, imageCategory)
         }
     }
-    suspend fun storeFile(fileName:String,pdfImageId:String):ApiStatus<Unit>{
+    suspend fun storeFile(fileName:String,pdfImageId:String):ApiStatus<AllFiles>{
         return apiCallHandler {
             apiInterface.storeFile(FileIds(pdfId = fileName, pdfImageId = pdfImageId))
         }

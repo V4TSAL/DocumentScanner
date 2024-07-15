@@ -20,7 +20,7 @@ interface ApiInterface {
     @POST("/api/upload")
     suspend fun addImage(@Part image: MultipartBody.Part, @Part("assetCategory") imageCategory: RequestBody) : Message
     @POST("/api/storeFile")
-    suspend fun storeFile(@Body fileName:FileIds)
+    suspend fun storeFile(@Body fileName:FileIds): AllFiles
 
     @GET("/api/getFileForUser/{userId}")
     suspend fun getFile(@Path("userId") userId:Int):AllFiles

@@ -7,8 +7,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,56 +32,69 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
-    private val splashViewModel : SplashViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
+
     @Inject
     lateinit var appPreferences: AppPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val showLoginScreen= splashViewModel.showLoginScreen.observeAsState(false)
+            val showLoginScreen = splashViewModel.showLoginScreen.observeAsState(false)
+            val showLoader = splashViewModel.showLoader.observeAsState(false)
             DocumentScannerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if(!showLoginScreen.value){
+                    if (!showLoginScreen.value) {
                         Greeting {
-                            if(appPreferences.getToken().isNotEmpty()){
+                            if (appPreferences.getToken().isNotEmpty()) {
                                 userId = appPreferences.getToken().toInt()
                                 goToHomeScreen()
-                            }
-                            else{
+                            } else {
                                 splashViewModel.showLoginScreen.value = true
                             }
                         }
                     } else {
-                        LoginOrSignup(login = { username, password ->
-                            splashViewModel.login(username = username, password = password){
-                                goToHomeScreen()
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            LoginOrSignup(login = { username, password ->
+                                splashViewModel.login(username = username, password = password) {
+                                    goToHomeScreen()
+                                }
+                            }, register = { username, password ->
+                                splashViewModel.signup(username = username, password = password)
+                            })
+                            if(showLoader.value){
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                             }
-                        }, register = { username, password ->
-                            splashViewModel.signup(username = username, password = password)
-                        })
+                        }
+
                     }
 
                 }
             }
         }
     }
-    private fun goToHomeScreen(){
-        val intent = Intent(this,MainActivity::class.java)
+
+    private fun goToHomeScreen() {
+        val intent = Intent(this, MainActivity::class.java)
         this.startActivity(intent)
         finish()
     }
 }
+
 @Composable
-fun Greeting(navigateToNewScreen: ()->Unit) {
-    LaunchedEffect(key1 = 1){
+fun Greeting(navigateToNewScreen: () -> Unit) {
+    LaunchedEffect(key1 = 1) {
         delay(1500)
         navigateToNewScreen()
     }
-    Column(modifier= Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         StyledText(text = " Scanner")
     }
 }
