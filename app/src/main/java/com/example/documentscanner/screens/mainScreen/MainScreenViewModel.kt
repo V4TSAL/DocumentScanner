@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.network.ApiRepository
 import com.example.documentscanner.network.ApiStatus
 import com.example.documentscanner.network.FileInformation
@@ -23,9 +24,9 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import javax.inject.Inject
-
+val isTokenValid = MutableLiveData(true)
 @HiltViewModel
-class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository) : ViewModel(){
+class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository,private val sharedPref: AppPreferences) : ViewModel(){
     private val _documentInformation  = MutableLiveData<List<FileInformation>>()
     val documentInformation : LiveData<List<FileInformation>> = _documentInformation
     var pdfFileId = ""
@@ -117,5 +118,8 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
             }
             showLoader.value = false
         }
+    }
+    fun logout(){
+        sharedPref.clearPreferences()
     }
 }

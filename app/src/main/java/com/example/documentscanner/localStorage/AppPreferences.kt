@@ -10,6 +10,7 @@ class AppPreferences @Inject constructor(@ApplicationContext context : Context){
         private val editor = preferences.edit()
         fun setToken(value : String) = editor.putString(PreferenceKeys.TOKEN.name,value).apply()
         fun getToken(): String = preferences.getString(PreferenceKeys.TOKEN.name,"") .toString()
+        fun clearPreferences() = editor.clear().apply()
 }
 
 enum class PreferenceKeys{

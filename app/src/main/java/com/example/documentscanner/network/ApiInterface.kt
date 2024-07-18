@@ -7,7 +7,6 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
-import retrofit2.http.Path
 
 interface ApiInterface {
     @GET("/api/users")
@@ -22,6 +21,6 @@ interface ApiInterface {
     @POST("/api/storeFile")
     suspend fun storeFile(@Body fileName:FileIds): AllFiles
 
-    @GET("/api/getFileForUser/{userId}")
-    suspend fun getFile(@Path("userId") userId:String):AllFiles
+    @GET("/api/getFileForUser")
+    suspend fun getFile():AllFiles
 }

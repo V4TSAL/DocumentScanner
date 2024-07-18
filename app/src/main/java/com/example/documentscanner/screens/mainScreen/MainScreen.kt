@@ -52,6 +52,7 @@ import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
+import com.example.documentscanner.SplashActivity
 import com.example.documentscanner.globals.baseUrl
 import com.example.documentscanner.network.FileInformation
 import com.example.documentscanner.screens.pdfViewer.PdfViewActivity
@@ -61,8 +62,17 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
+fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()->Unit) {
     viewModel.getUserFile()
+    val context = LocalContext.current
+    isTokenValid.observeForever{
+        if(!isTokenValid.value!!){
+            context.startActivity(Intent(context,SplashActivity::class.java))
+            viewModel.logout()
+            Toast.makeText(context,"Session expired",Toast.LENGTH_SHORT).show()
+            stopActivity()
+        }
+    }
     val showLoader = viewModel.showLoader.observeAsState(false)
     val scannerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -101,7 +111,6 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
         .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
         .build()
     val scanner = GmsDocumentScanning.getClient(options)
-    val context = LocalContext.current
     val files = viewModel.documentInformation.observeAsState(arrayListOf())
     Scaffold(modifier = Modifier
         .fillMaxSize()

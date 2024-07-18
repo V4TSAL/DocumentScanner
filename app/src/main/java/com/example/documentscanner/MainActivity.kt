@@ -33,7 +33,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen(this@MainActivity,viewModel)
+                    MainScreen(this@MainActivity,viewModel){
+                        finish()
+                    }
                 }
             }
         }

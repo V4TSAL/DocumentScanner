@@ -36,7 +36,7 @@ class ApiRepository @Inject constructor(private val apiInterface:ApiInterface) {
     }
     suspend fun getFile():ApiStatus<AllFiles>{
         return apiCallHandler {
-            apiInterface.getFile(userId!!)
+            apiInterface.getFile()
         }
     }
 }
