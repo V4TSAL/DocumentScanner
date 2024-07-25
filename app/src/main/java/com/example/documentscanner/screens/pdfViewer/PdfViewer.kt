@@ -1,48 +1,13 @@
-import android.graphics.Bitmap
-import android.graphics.pdf.PdfRenderer
-import android.net.Uri
-import android.os.ParcelFileDescriptor
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
-import coil.compose.rememberImagePainter
-import coil.imageLoader
-import coil.memory.MemoryCache
-import coil.request.ImageRequest
-import com.example.documentscanner.globals.baseUrl
 import com.rizzi.bouquet.ResourceType
 import com.rizzi.bouquet.VerticalPDFReader
 import com.rizzi.bouquet.VerticalPdfReaderState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlin.math.sqrt
 
 //@Composable
 //fun PdfViewer(
@@ -134,8 +99,7 @@ import kotlin.math.sqrt
 //}
 @Composable
 fun PdfViewer(modifier: Modifier = Modifier,uri: String) {
-    val pdfUrl = "$baseUrl/api/getFile/${uri}"
-    val pdfVerticalReaderState = VerticalPdfReaderState(ResourceType.Remote(pdfUrl), isZoomEnable = true)
+    val pdfVerticalReaderState = VerticalPdfReaderState(ResourceType.Remote(uri), isZoomEnable = true)
     VerticalPDFReader(
         state = pdfVerticalReaderState, modifier = Modifier
             .fillMaxSize()

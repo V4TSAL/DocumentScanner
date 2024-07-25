@@ -193,7 +193,7 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
                 .padding(12.dp)
         ) {
             AsyncImage(
-                model  = "$baseUrl/api/getFile/${item.fileImageId}",contentDescription = "Image",
+                model  = {item.fileImageId},contentDescription = "Image",
                 Modifier
                     .padding(12.dp)
                     .height(120.dp))
