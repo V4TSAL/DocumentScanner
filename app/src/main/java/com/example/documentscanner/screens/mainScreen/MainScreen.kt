@@ -1,5 +1,6 @@
 package com.example.documentscanner.screens.mainScreen
 
+import PdfViewer
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -12,8 +13,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -95,10 +98,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
                 viewModel.uploadImage(pdfUri!!.toFile()){pdfId->
                     viewModel.pdfFileId = pdfId
-                    viewModel.uploadImage(imageUri!!.toFile()){imageId->
-                        viewModel.pdfImageId = imageId
-                        viewModel.storeFile(fileName = viewModel.pdfFileId, pdfImageId = viewModel.pdfImageId)
-                    }
+                    viewModel.storeFile(fileName = viewModel.pdfFileId, pdfImageId = viewModel.pdfFileId)
                 }
             }
         })
@@ -188,15 +188,20 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .padding(12.dp)
         ) {
-            AsyncImage(
-                model  = item.fileImageId,contentDescription = "Image",
-                Modifier
-                    .padding(12.dp)
-                    .height(120.dp))
+//            AsyncImage(
+//                model  = item.fileImageId,contentDescription = "Image",
+//                Modifier
+//                    .padding(12.dp)
+//                    .height(120.dp))
+            Box(modifier = Modifier.height(130.dp)){
+                PdfViewer(uri = item.fileId!!,modifier = Modifier.padding(12.dp))
+            }
             Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
