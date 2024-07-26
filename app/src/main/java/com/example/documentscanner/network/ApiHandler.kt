@@ -1,16 +1,20 @@
 package com.example.documentscanner.network
 
 
-import com.google.android.gms.common.api.Api
+import com.example.documentscanner.screens.mainScreen.isTokenValid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
 object ApiHandler {
     suspend fun <T> apiCallHandler(apiCall:suspend ()->T) : ApiStatus<T>{
         return withContext(Dispatchers.IO){
             try {
                 ApiStatus.Success(apiCall.invoke())
-            }catch (e:Exception){
+            }catch (e:HttpException){
+                if(e.code() == 401){
+                    isTokenValid.postValue(false)
+                }
                 ApiStatus.Error(ApiError(message = e.message.toString()))
             }
         }

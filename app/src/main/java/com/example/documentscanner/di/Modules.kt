@@ -1,6 +1,10 @@
 package com.example.documentscanner.di
 
+import com.example.documentscanner.globals.baseUrl
+import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.network.ApiInterface
+import com.example.documentscanner.network.AuthTokenInterceptor
+import com.example.documentscanner.network.AuthTokenManager
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -18,16 +22,17 @@ import javax.inject.Singleton
 object Modules {
     @Provides
     @Singleton
-    fun providesRetrofit():Retrofit {
+    fun providesRetrofit(authTokenInterceptor: AuthTokenInterceptor):Retrofit {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         val okHttpClient = OkHttpClient().newBuilder()
+            .addInterceptor(authTokenInterceptor)
             .addInterceptor(httpLoggingInterceptor)
             .writeTimeout(2, TimeUnit.MINUTES)
             .readTimeout(2, TimeUnit.MINUTES)
             .build()
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.28:8080")
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
             .client(okHttpClient)
             .build()
@@ -36,5 +41,10 @@ object Modules {
     @Singleton
     fun providesApi(retrofit: Retrofit):ApiInterface{
         return retrofit.create(ApiInterface::class.java)
+    }
+    @Provides
+    @Singleton
+    fun provideAuthToken(appPreferences: AppPreferences):AuthTokenManager{
+        return AuthTokenManager(appPreferences)
     }
 }

@@ -3,6 +3,7 @@ package com.example.documentscanner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.documentscanner.globals.userId
 import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.network.ApiRepository
 import com.example.documentscanner.network.ApiStatus
@@ -19,25 +20,38 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(private val apiRepo:ApiRepository,private val appPref:AppPreferences) : ViewModel() {
     val showLoginScreen  = MutableLiveData(false)
-    fun login(username: String, password: String){
+    val showLoader  = MutableLiveData(false)
+    fun login(username: String, password: String,onSuccess:()->Unit){
         viewModelScope.launch{
+            showLoader.value = true
             var result = apiRepo.login(User(userName = username,password = password))
             when(result){
                 is ApiStatus.Success -> {
-                    println("Success")
+                    appPref.setToken(result.data.message.toString())
+                    userId = result.data.message
+                    onSuccess()
                 }
                 is ApiStatus.Error -> {
                     println("Error")
                 }
             }
-            apiRepo.login(User(userName = username,password = password))
-            appPref.setToken("LOGGEDIN")
+            showLoader.value = false
         }
     }
-    fun signup(username: String, password: String){
+    fun signup(username: String, password: String,onSuccess:()->Unit){
         viewModelScope.launch{
-            apiRepo.singUp(User(userName = username,password = password))
-            appPref.setToken("LOGGEDIN")
+            showLoader.value = true
+            val result = apiRepo.singUp(User(userName = username,password = password))
+            when(result){
+                is ApiStatus.Success -> {
+                    appPref.setToken(result.data.message.toString())
+                    onSuccess()
+                }
+                is ApiStatus.Error -> {
+                    println("Error")
+                }
+            }
+            showLoader.value = false
         }
     }
 

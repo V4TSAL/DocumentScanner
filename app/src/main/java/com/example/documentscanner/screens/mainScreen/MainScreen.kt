@@ -1,5 +1,6 @@
 package com.example.documentscanner.screens.mainScreen
 
+import PdfViewer
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -12,8 +13,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -51,6 +55,9 @@ import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import com.example.documentscanner.Greeting
 import com.example.documentscanner.R
+import com.example.documentscanner.SplashActivity
+import com.example.documentscanner.globals.baseUrl
+import com.example.documentscanner.network.FileInformation
 import com.example.documentscanner.screens.pdfViewer.PdfViewActivity
 import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
@@ -58,7 +65,18 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
+fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()->Unit) {
+    viewModel.getUserFile()
+    val context = LocalContext.current
+    isTokenValid.observeForever{
+        if(!isTokenValid.value!!){
+            context.startActivity(Intent(context,SplashActivity::class.java))
+            viewModel.logout()
+            Toast.makeText(context,"Session expired",Toast.LENGTH_SHORT).show()
+            stopActivity()
+        }
+    }
+    val showLoader = viewModel.showLoader.observeAsState(false)
     val scannerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
@@ -77,9 +95,11 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     pdfUri!!.toFile()
                     val pageCount = pdf.pageCount
                 }
-                viewModel.addFile(fileInfo = FileModel(file = pdfUri!!.toFile(), pdfUri = pdfUri!!,imageUri = imageUri!!))
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
-                viewModel.uploadImage(pdfUri!!.toFile())
+                viewModel.uploadImage(pdfUri!!.toFile()){pdfId->
+                    viewModel.pdfFileId = pdfId
+                    viewModel.storeFile(fileName = viewModel.pdfFileId, pdfImageId = viewModel.pdfFileId)
+                }
             }
         })
     val options = GmsDocumentScannerOptions.Builder()
@@ -91,7 +111,6 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
         .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
         .build()
     val scanner = GmsDocumentScanning.getClient(options)
-    val context = LocalContext.current
     val files = viewModel.documentInformation.observeAsState(arrayListOf())
     Scaffold(modifier = Modifier
         .fillMaxSize()
@@ -104,16 +123,12 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                AsyncImage(
-                    model  = "http://192.168.1.28:8080/api/getFile/file-535744591394890.pdf",contentDescription = "Image",Modifier
-                        .padding(12.dp)
-                        .height(120.dp))
                 if(files.value.isNotEmpty()){
                     LazyVerticalGrid(columns = GridCells.Fixed(2)){
                         items(files.value){ fileInfo->
                             GridViewItems(item = fileInfo) {fileInformation->
                                 val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.pdfUri.toString())
+                                intent.putExtra("pdfUri",fileInformation.fileId)
                                 context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
@@ -127,6 +142,9 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
                         }
                     }
                 }
+            }
+            if(showLoader.value){
+                CircularProgressIndicator(modifier= Modifier.align(Alignment.Center))
             }
             if(files.value.isEmpty()){
                 Text(text = "No files found tap on the plus icon to start", modifier = Modifier.align(Alignment.Center))
@@ -151,7 +169,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel) {
 }
 
 @Composable
-fun GridViewItems(item : FileModel, itemOnTap: (fileModel: FileModel)-> Unit) {
+fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation)-> Unit) {
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
@@ -170,15 +188,21 @@ fun GridViewItems(item : FileModel, itemOnTap: (fileModel: FileModel)-> Unit) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .padding(12.dp)
         ) {
-            AsyncImage(
-                model  = item.imageUri,contentDescription = "Image",Modifier
-                    .padding(12.dp)
-                    .height(120.dp))
-            Text(text = item.file.name, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+//            AsyncImage(
+//                model  = item.fileImageId,contentDescription = "Image",
+//                Modifier
+//                    .padding(12.dp)
+//                    .height(120.dp))
+            Box(modifier = Modifier.height(130.dp)){
+                PdfViewer(uri = item.fileId!!,modifier = Modifier.padding(12.dp))
+            }
+            Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
         }
     }
 }
