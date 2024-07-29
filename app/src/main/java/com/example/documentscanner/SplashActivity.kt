@@ -6,10 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +22,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.documentscanner.globals.userId
 import com.example.documentscanner.localStorage.AppPreferences
 import com.example.documentscanner.screens.LoginOrSignup
@@ -68,8 +74,13 @@ class SplashActivity : AppCompatActivity() {
                                 }
                             })
                             if(showLoader.value){
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
+                                Box(modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .align(alignment = Alignment.Center)
+                                ){
+                                    CircularProgressIndicator(color = Color.Black,modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                }                            }
                         }
 
                     }

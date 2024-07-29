@@ -45,28 +45,6 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
         }
         _documentInformation.value = tempArray
     }
-
-    fun sharePdf(context: Context, file: File) {
-        if (!file.exists()) {
-            Log.e("sharePdf", "File does not exist: ${file.path}")
-            return
-        }
-
-        val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-        } else {
-            Uri.fromFile(file)
-        }
-
-        val shareIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            type = "application/pdf"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-
-        context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
-    }
     fun uploadImage(file:File, onSuccess : (fileName : String)->Unit){
         val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
@@ -81,6 +59,7 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
                 }
 
                 is ApiStatus.Error -> {
+                    showLoader.value = false
                 }
             }
 //            _loading.value = false

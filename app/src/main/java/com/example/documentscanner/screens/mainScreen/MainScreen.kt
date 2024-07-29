@@ -22,10 +22,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -143,13 +145,19 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
                     }
                 }
             }
-            if(showLoader.value){
-                CircularProgressIndicator(modifier= Modifier.align(Alignment.Center))
-            }
             if(files.value.isEmpty()){
                 Text(text = "No files found tap on the plus icon to start", modifier = Modifier.align(Alignment.Center))
             }
-            FloatingActionButton(onClick = {
+            if(showLoader.value){
+                Box(modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .align(alignment = Alignment.Center)
+                ){
+                    CircularProgressIndicator(color = Color.Black,modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                }
+            }
+            FloatingActionButton(containerColor = Color.Cyan,onClick = {
                 scanner.getStartScanIntent(activity)
                     .addOnSuccessListener {scannerIntent->
                         scannerLauncher.launch(IntentSenderRequest.Builder( scannerIntent).build())
@@ -161,7 +169,7 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
             },modifier   = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)) {
-                Icon(Icons.Filled.Add, contentDescription = "Scan document")
+                Icon(Icons.Filled.Add, contentDescription = "Scan document", tint = Color.Black)
             }
         }
 
@@ -202,7 +210,7 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
             Box(modifier = Modifier.height(130.dp)){
                 PdfViewer(uri = item.fileId!!,modifier = Modifier.padding(12.dp))
             }
-            Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2, color = Color.Black)
         }
     }
 }
