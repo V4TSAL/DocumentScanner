@@ -3,6 +3,7 @@ package com.example.documentscanner.screens.mainScreen
 import PdfViewer
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -16,6 +17,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +35,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -46,8 +52,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -154,7 +162,9 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
                     .background(Color.White)
                     .align(alignment = Alignment.Center)
                 ){
-                    CircularProgressIndicator(color = Color.Black,modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                    CircularProgressIndicator(color = Color.Black,modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(2.dp))
                 }
             }
             FloatingActionButton(containerColor = Color.Cyan,onClick = {
@@ -178,6 +188,8 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
 
 @Composable
 fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation)-> Unit) {
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
@@ -190,9 +202,6 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
                 color = Color(0xFFD9D9D9),
                 shape = RoundedCornerShape(8.dp)
             )
-            .clickable {
-                itemOnTap(item)
-            }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,7 +219,22 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
             Box(modifier = Modifier.height(130.dp)){
                 PdfViewer(uri = item.fileId!!,modifier = Modifier.padding(12.dp))
             }
-            Text(text = item.fileId!!, textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2, color = Color.Black)
+            Text(text = item.fileId!!.substring(55), textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2, color = Color.Black)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround){
+                Button(shape = RoundedCornerShape(8.dp),colors = ButtonDefaults.buttonColors(containerColor = Color.Black),onClick = {
+                    itemOnTap(item)
+                }) {
+                    Text("View", color = Color.White)
+                }
+                Icon(Icons.Filled.Share,
+                    contentDescription = "Share icon",
+                    modifier = Modifier.clickable {
+                        clipboardManager.setText(AnnotatedString(item.fileId!!))
+                        Toast.makeText(context,"Copied to clipboard",Toast.LENGTH_SHORT).show()
+                    }, tint = Color.Black)
+            }
+
         }
     }
 }
