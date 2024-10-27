@@ -15,7 +15,7 @@ class AuthTokenInterceptor @Inject constructor(private val tokenManager: AuthTok
             request = if(token.isNotEmpty()){
                 Log.d("TOKEN", "intercept: $token")
                 orignal.newBuilder()
-                    .header("Authorization", token)
+                    .header("Authorization", "Bearer $token")
                     .method(orignal.method, orignal.body).build()
             }else{
                 request
