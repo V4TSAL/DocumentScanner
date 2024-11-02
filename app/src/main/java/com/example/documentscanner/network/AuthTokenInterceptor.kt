@@ -16,6 +16,7 @@ class AuthTokenInterceptor @Inject constructor(private val tokenManager: AuthTok
                 Log.d("TOKEN", "intercept: $token")
                 orignal.newBuilder()
                     .header("Authorization", "Bearer $token")
+                    .header("seceret_text","VGhpcyBpcyBteSBmaXJzdCBmdWxsLXN0YWNrIHByb2plY3QsIGFuZCBJ4oCZZCBsaWtlIHRvIGVuaGFuY2UgaXRzIHNlY3VyaXR5IHdpdGggc29tZSBhZGRpdGlvbmFsIGZlYXR1cmVzLg==")
                     .method(orignal.method, orignal.body).build()
             }else{
                 request
