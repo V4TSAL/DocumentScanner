@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,6 +61,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toFile
 import coil.compose.AsyncImage
@@ -73,16 +75,17 @@ import com.google.firebase.components.BuildConfig
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()->Unit) {
+fun MainScreen(activity: Activity, viewModel: MainScreenViewModel, stopActivity: () -> Unit) {
     viewModel.getUserFile()
     val context = LocalContext.current
-    isTokenValid.observeForever{
-        if(!isTokenValid.value!!){
-            context.startActivity(Intent(context,SplashActivity::class.java))
+    isTokenValid.observeForever {
+        if (!isTokenValid.value!!) {
+            context.startActivity(Intent(context, SplashActivity::class.java))
             viewModel.logout()
-            Toast.makeText(context,"Session expired",Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Session expired", Toast.LENGTH_SHORT).show()
             stopActivity()
         }
     }
@@ -106,9 +109,12 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
                     val pageCount = pdf.pageCount
                 }
                 Log.d("FILE INFORMATION ", "MainScreen: ${viewModel.documentInformation.value}")
-                viewModel.uploadImage(pdfUri!!.toFile()){pdfId->
+                viewModel.uploadImage(pdfUri!!.toFile()) { pdfId ->
                     viewModel.pdfFileId = pdfId
-                    viewModel.storeFile(fileName = viewModel.pdfFileId, pdfImageId = viewModel.pdfFileId)
+                    viewModel.storeFile(
+                        fileName = viewModel.pdfFileId,
+                        pdfImageId = viewModel.pdfFileId
+                    )
                 }
             }
         })
@@ -124,21 +130,31 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
     val files = viewModel.documentInformation.observeAsState(arrayListOf())
     Scaffold(modifier = Modifier
         .fillMaxSize()
-        .statusBarsPadding(), topBar = { TopAppBar(title = { Greeting {} }) }) { scaffoldPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(top = scaffoldPadding.calculateTopPadding())) {
+        .statusBarsPadding(),
+        topBar = { TopAppBar(title = { Greeting {} }) }) { scaffoldPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = scaffoldPadding.calculateTopPadding())
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp)
             ) {
-                if(files.value.isNotEmpty()){
-                    LazyVerticalGrid(columns = GridCells.Fixed(2)){
-                        items(files.value){ fileInfo->
-                            GridViewItems(item = fileInfo) {fileInformation->
-                                val intent = Intent(context,PdfViewActivity::class.java)
-                                intent.putExtra("pdfUri",fileInformation.fileId)
+                if (files.value.isNotEmpty()) {
+                    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+                        items(files.value) { fileInfo ->
+                            GridViewItems(item = fileInfo, onDeleteTap = {deleteFileInformation->
+//                                Toast.makeText(context, "Delete button tapped", Toast.LENGTH_SHORT)
+//                                    .show()
+                                viewModel.deleteFile(deleteFileInformation.id!!){
+                                    Toast.makeText(context,"File deleted successfully", Toast.LENGTH_SHORT).show()
+                                    viewModel.getUserFile()
+                                }
+                            }) { fileInformation ->
+                                val intent = Intent(context, PdfViewActivity::class.java)
+                                intent.putExtra("pdfUri", fileInformation.fileId)
                                 context.startActivity(intent)
 //                                val shareIntent = Intent().apply {
 //                                    action = Intent.ACTION_SEND
@@ -153,32 +169,43 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
                     }
                 }
             }
-            if(files.value.isEmpty()){
-                Text(text = "No files found tap on the plus icon to start", modifier = Modifier.align(Alignment.Center))
+            if (files.value.isEmpty()) {
+                Text(
+                    text = "No files found tap on the plus icon to start",
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
-            if(showLoader.value){
-                Box(modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White)
-                    .align(alignment = Alignment.Center)
-                ){
-                    CircularProgressIndicator(color = Color.Black,modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(2.dp))
+            if (showLoader.value) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .align(alignment = Alignment.Center)
+                ) {
+                    CircularProgressIndicator(
+                        color = Color.Black, modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(2.dp)
+                    )
                 }
             }
-            FloatingActionButton(containerColor = Color.Cyan,onClick = {
-                scanner.getStartScanIntent(activity)
-                    .addOnSuccessListener {scannerIntent->
-                        scannerLauncher.launch(IntentSenderRequest.Builder( scannerIntent).build())
+            FloatingActionButton(
+                containerColor = Color.Cyan, onClick = {
+                    scanner.getStartScanIntent(activity)
+                        .addOnSuccessListener { scannerIntent ->
+                            scannerLauncher.launch(
+                                IntentSenderRequest.Builder(scannerIntent).build()
+                            )
 
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(context,"Something went wrong", Toast.LENGTH_SHORT).show()
-                    }
-            },modifier   = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)) {
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                }, modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = "Scan document", tint = Color.Black)
             }
         }
@@ -187,14 +214,18 @@ fun MainScreen(activity: Activity,viewModel: MainScreenViewModel,stopActivity:()
 }
 
 @Composable
-fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation)-> Unit) {
+fun GridViewItems(
+    item: FileInformation,
+    onDeleteTap: (fileModel: FileInformation) -> Unit,
+    itemOnTap: (fileModel: FileInformation) -> Unit
+) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     Box(
         modifier = Modifier
             .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
 //            .width(140.dp)
-            .height(220.dp)
+            .height(280.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(color = Color.White)
             .border(
@@ -216,25 +247,59 @@ fun GridViewItems(item : FileInformation, itemOnTap: (fileModel: FileInformation
 //                Modifier
 //                    .padding(12.dp)
 //                    .height(120.dp))
-            Box(modifier = Modifier.height(130.dp)){
-                PdfViewer(uri = item.fileId!!,modifier = Modifier.padding(12.dp))
+            Box(modifier = Modifier.height(130.dp)) {
+                PdfViewer(uri = item.fileId!!, modifier = Modifier.padding(12.dp))
             }
-            Text(text = item.fileId!!.substring(55), textAlign = TextAlign.Center,style = TextStyle(fontWeight = FontWeight(700)),overflow = TextOverflow.Ellipsis, maxLines = 2, color = Color.Black)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround){
-                Button(shape = RoundedCornerShape(8.dp),colors = ButtonDefaults.buttonColors(containerColor = Color.Black),onClick = {
+            Text(
+                text = item.fileId!!.substring(55),
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontWeight = FontWeight(700)),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                color = Color.Black
+            )
+            Button(
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
                     itemOnTap(item)
                 }) {
-                    Text("View", color = Color.White)
-                }
+                Text("View", color = Color.White)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Icon(
+                    Icons.Filled.Delete,
+                    tint = Color.Red,
+                    contentDescription = "Delete icon",
+                    modifier = Modifier.clickable {
+                        onDeleteTap(item)
+                    })
                 Icon(Icons.Filled.Share,
                     contentDescription = "Share icon",
                     modifier = Modifier.clickable {
                         clipboardManager.setText(AnnotatedString(item.fileId!!))
-                        Toast.makeText(context,"Copied to clipboard",Toast.LENGTH_SHORT).show()
-                    }, tint = Color.Black)
+                        Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                    }, tint = Color.Black
+                )
             }
 
         }
     }
+}
+
+@Preview
+@Composable
+fun p() {
+    GridViewItems(
+        item = FileInformation(
+            id = 1,
+            fileId = "dfsjdafhjksadhfjjsdakfjksdajfksdkfjskdjfkdsjfkfdsadakfjksdajfkdsjafkjasdkfjkjdksdajflkjdsaklfjaskdjfksdajfkdasjfkjasdkfjkasdjfksdajkfjsdkfjksdajfkdjfkasdjfkajsdfkasjdfkdsjakfjsdkfj",
+            fileImageId = ""
+        ), onDeleteTap = {}, itemOnTap = {})
+
 }

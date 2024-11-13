@@ -98,6 +98,27 @@ class MainScreenViewModel @Inject constructor(private val apiRepo: ApiRepository
             showLoader.value = false
         }
     }
+    fun deleteFile(fileId: Int,onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            showLoader.value = true
+            try {
+                val result = apiRepo.deleteFile(fileId = fileId)
+                when (result) {
+                    is ApiStatus.Success -> {
+                        // Implement logic here
+                        onSuccess()
+                    }
+                    is ApiStatus.Error -> {
+                        Log.d("ERROR BLOCK CHECK", "getFile: ${result.apiError}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("DELETE FILE ERROR", "Exception: ${e.message}", e)
+            } finally {
+                showLoader.value = false
+            }
+        }
+    }
     fun logout(){
         sharedPref.clearPreferences()
     }

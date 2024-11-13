@@ -39,4 +39,9 @@ class ApiRepository @Inject constructor(private val apiInterface:ApiInterface) {
             apiInterface.getFile()
         }
     }
+    suspend fun deleteFile(fileId : Int):ApiStatus<Unit>{
+        return apiCallHandler {
+            apiInterface.deleteFile(DeleteFileModel(fileId))
+        }
+    }
 }
