@@ -125,6 +125,7 @@ fun MainScreen(activity: Activity, viewModel: MainScreenViewModel, stopActivity:
             GmsDocumentScannerOptions.RESULT_FORMAT_PDF
         )
         .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+        .setGalleryImportAllowed(true)
         .build()
     val scanner = GmsDocumentScanning.getClient(options)
     val files = viewModel.documentInformation.observeAsState(arrayListOf())
